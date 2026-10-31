@@ -4,9 +4,58 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 bookeeping-core.workspace = true
-bookeeping-backend.workspace = true
 anyhow.workspace = true
 log.workspace = true
-env_logger.workspace = true
+
+leptos = { version = "=0.9.0-rc0" }
+leptos_meta = { version = "=0.9.0-rc0" }
+leptos_router = { version = "=0.9.0-rc0" }
+
+# Server-only dependencies
+axum = { version = "0.8", optional = true }
+leptos_axum = { version = "=0.9.0-rc0", optional = true }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"], optional = true }
+
+# Browser-only dependencies
+console_error_panic_hook = { version = "0.1", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+
+[features]
+default = []
+
+hydrate = [
+    "leptos/hydrate",
+    "dep:console_error_panic_hook",
+    "dep:wasm-bindgen",
+]
+
+ssr = [
+    "dep:axum",
+    "dep:leptos_axum",
+    "dep:tokio",
+    "leptos/ssr",
+    "leptos_meta/ssr",
+    "leptos_router/ssr",
+]
+
+[package.metadata.leptos]
+output-name = "bookeeping-frontend"
+site-root = "target/site"
+site-pkg-dir = "pkg"
+site-addr = "127.0.0.1:3000"
+reload-port = 3001
+env = "DEV"
+
+tailwind-input-file = "style/tailwind.css"
+browserquery = "defaults"
+
+bin-features = ["ssr"]
+bin-default-features = false
+
+lib-features = ["hydrate"]
+lib-default-features = false
